@@ -1,0 +1,4 @@
+NUM_TOP_K = 5
+PATCH_SIZE = 105
+NUM_PATCHES = 5
+MODEL_PATH = "models/font77_vgg16.pt"
