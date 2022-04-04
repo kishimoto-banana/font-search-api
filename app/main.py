@@ -18,11 +18,6 @@ torch.manual_seed(5)
 np.random.seed(5)
 random.seed(5)
 
-import pprint
-import sys
-
-pprint.pprint(sys.path)
-
 
 def base64_to_pil(img_str: str, gray: bool = False) -> Image:
     img_raw = base64.b64decode(img_str)
