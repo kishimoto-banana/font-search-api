@@ -6,7 +6,10 @@ from pydantic import BaseModel
 
 @dataclass
 class PredictFont:
-    label: int
+    fontName: str
+    fontNameJa: str
+    fontNameEn: str
+    fontWeight: int
     score: float
 
 

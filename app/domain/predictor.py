@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from app.config.settings import NUM_TOP_K
+from app.config.settings import NUM_TOP_K, FONT_LABEL_TO_META, FONT_WEIGHT_TO_NAME
 from app.domain.entity import PredictFont, Response
 from app.domain.preprocess import Preprocessor
 from PIL import Image
@@ -38,7 +38,13 @@ class FontPredictor(Predictor):
 
         return Response(
             fonts=[
-                PredictFont(label=f, score=round(s, 3))
+                PredictFont(
+                    fontName=FONT_LABEL_TO_META[f]["fontName"],
+                    fontNameJa=FONT_LABEL_TO_META[f]["fontNameJa"],
+                    fontNameEn=FONT_LABEL_TO_META[f]["fontNameEn"],
+                    fontWeight=FONT_LABEL_TO_META[f]["fontWeight"],
+                    score=round(s, 3),
+                )
                 for f, s in zip(top_fonts, scores)
             ]
         )
