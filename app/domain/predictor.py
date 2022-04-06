@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from app.config.settings import NUM_TOP_K, FONT_LABEL_TO_META, FONT_WEIGHT_TO_NAME
+from app.config.settings import NUM_TOP_K, FONT_LABEL_TO_META
 from app.domain.entity import PredictFont, Response
 from app.domain.preprocess import Preprocessor
 from PIL import Image
