@@ -4,8 +4,7 @@ from typing import List
 from pydantic import BaseModel
 
 
-@dataclass
-class PredictFont:
+class PredictFont(BaseModel):
     fontName: str
     fontNameJa: str
     fontNameEn: str
