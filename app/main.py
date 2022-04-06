@@ -7,6 +7,7 @@ import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
+from mangum import Mangum
 
 from app.config.settings import MODEL_PATH, NUM_PATCHES
 from app.domain.entity import Request, Response
@@ -56,9 +57,12 @@ async def startup_event():
     app.state.predictor = predictor
 
 
-@app.post("/v1/fonts/")
-async def predict_fonts(req: Request, response_model=Response):
+@app.post("/v1/fonts/", response_model=Response)
+async def predict_fonts(req: Request):
     content = req.content
     image = base64_to_pil(content, gray=True)
 
     return app.state.predictor.predict(image)
+
+
+handler = Mangum(app)
