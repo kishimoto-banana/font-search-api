@@ -1,0 +1,20 @@
+service: font-search-api
+
+provider:
+  name: aws
+  stage: prod
+  region: ap-northeast-1
+  timeout: 900
+  # deploymentBucket: font-search-api
+  logRetentionInDays: 30 # Cloudwatchのログ保存期間
+
+functions:
+  index:
+    image: 414642565170.dkr.ecr.ap-northeast-1.amazonaws.com/font-search-api:v10
+    events:
+      - http:
+          integration: lambda-proxy
+          path: /{proxy+}
+          method: ANY
+          cors: true
+          private: true

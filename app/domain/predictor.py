@@ -24,6 +24,21 @@ class Predictor(metaclass=ABCMeta):
         raise NotImplementedError("Method not implemented")
 
 
+class MockPredictor(Predictor):
+    def predict(self, image: Image) -> Response:
+        return Response(
+            fonts=[
+                PredictFont(
+                    fontName="a",
+                    fontNameJa="a",
+                    fontNameEn="a",
+                    fontWeight=100,
+                    score=0.1,
+                )
+            ]
+        )
+
+
 class FontPredictor(Predictor):
     def __init__(self, preprocessor: Preprocessor, model: nn.Module) -> None:
         self.preprocessor = preprocessor
