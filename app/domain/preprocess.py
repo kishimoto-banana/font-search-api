@@ -14,7 +14,10 @@ def resize(img: Image) -> Image:
     if img.size[1] == PATCH_SIZE:
         return img
     y_ratio = PATCH_SIZE / img.size[1]
-    return img.resize((int(img.size[0] * y_ratio), PATCH_SIZE))
+    width = int(img.size[0] * y_ratio)
+    if width < PATCH_SIZE:
+        return img.resize((PATCH_SIZE, PATCH_SIZE))
+    return img.resize((width, PATCH_SIZE))
 
 
 class Preprocessor(metaclass=ABCMeta):
