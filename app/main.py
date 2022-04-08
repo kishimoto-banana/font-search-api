@@ -10,6 +10,7 @@ from PIL import Image
 from mangum import Mangum
 
 from app.config.settings import MODEL_PATH, NUM_PATCHES
+from app.config.constant import OCR_RESPONSE_BODY
 from app.domain.entity import Request, Response
 from app.domain.predictor import FontPredictor, fetch_vgg16
 from app.domain.preprocess import FontImagePreprocessor
@@ -63,6 +64,11 @@ async def predict_fonts(req: Request):
     image = base64_to_pil(content, gray=True)
 
     return app.state.predictor.predict(image)
+
+
+@app.post("/mock/ocr/")
+async def mock_ocr():
+    return OCR_RESPONSE_BODY
 
 
 handler = Mangum(app)
