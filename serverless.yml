@@ -10,7 +10,7 @@ provider:
 
 functions:
   index:
-    image: 414642565170.dkr.ecr.ap-northeast-1.amazonaws.com/font-search-api:v10
+    image: 414642565170.dkr.ecr.ap-northeast-1.amazonaws.com/font-search-api:v12
     events:
       - http:
           integration: lambda-proxy
