@@ -35,6 +35,10 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "https://font-search.vercel.app/",
+    "https://font-search.vercel.app",
+    "https://fontpint.com",
+    "https://fontpint.com/",
 ]
 
 app.add_middleware(
