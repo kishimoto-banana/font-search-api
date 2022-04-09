@@ -11,7 +11,7 @@ from torchvision import models
 
 
 def fetch_vgg16() -> nn.Module:
-    net = models.vgg16_bn()
+    net = models.vgg16_bn(pretrained=False)
     net.features[0] = nn.Conv2d(1, 64, 3, stride=1, padding=1)
     net.classifier[6] = nn.Linear(4096, 117)
 
