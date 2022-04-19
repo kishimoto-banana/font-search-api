@@ -13,7 +13,7 @@ from torchvision import models
 def fetch_vgg16() -> nn.Module:
     net = models.vgg16_bn(pretrained=False)
     net.features[0] = nn.Conv2d(1, 64, 3, stride=1, padding=1)
-    net.classifier[6] = nn.Linear(4096, 117)
+    net.classifier[6] = nn.Linear(4096, 365)
 
     return net
 
@@ -33,6 +33,8 @@ class MockPredictor(Predictor):
                     fontNameJa="a",
                     fontNameEn="a",
                     fontWeight=100,
+                    type="adobe",
+                    adobeId="asssa",
                     score=0.1,
                 )
             ]
@@ -58,6 +60,8 @@ class FontPredictor(Predictor):
                     fontNameJa=FONT_LABEL_TO_META[f]["fontNameJa"],
                     fontNameEn=FONT_LABEL_TO_META[f]["fontNameEn"],
                     fontWeight=FONT_LABEL_TO_META[f]["fontWeight"],
+                    type=FONT_LABEL_TO_META[f]["type"],
+                    adobeId=FONT_LABEL_TO_META[f]["adobeId"],
                     score=round(s, 3),
                 )
                 for f, s in zip(top_fonts, scores)

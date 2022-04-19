@@ -9,6 +9,8 @@ class PredictFont(BaseModel):
     fontNameJa: str
     fontNameEn: str
     fontWeight: int
+    type: str
+    adobeId: str
     score: float
 
 
