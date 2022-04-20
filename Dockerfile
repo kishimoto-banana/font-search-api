@@ -2,13 +2,11 @@ FROM python:3.9-slim
 
 ARG APP_DIR="/home/app"
 WORKDIR ${APP_DIR}
-RUN pip install awslambdaric poetry
+RUN pip install poetry
 COPY pyproject.toml poetry.lock ./
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-root --no-dev
+RUN poetry install --no-root --no-dev
 
 COPY ./models ./models
 COPY ./app ./app
 
-ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
-CMD [ "app/main.handler" ]
+CMD [ "poetry", "run", "uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "80" ]

@@ -13,11 +13,15 @@ torchvision = "^0.12.0"
 albumentations = "^1.1.0"
 Pillow = "^9.1.0"
 mangum = "^0.14.1"
+uvicorn = "^0.17.6"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
-uvicorn = "^0.17.6"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+moto@kishimotomasashinoMacBook-Pro [21時25分44秒] [~] 
+-> % hey -n 10 -c 10 -m POST -H "Content-Type: application/json" -D ./body.txt https://font-search-api.5ptbfrnv53qj2.ap-northeast-1.cs.amazonlightsail.com/v1/fonts/
