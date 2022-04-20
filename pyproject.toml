@@ -21,7 +21,3 @@ black = "^22.3.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-
-moto@kishimotomasashinoMacBook-Pro [21時25分44秒] [~] 
--> % hey -n 10 -c 10 -m POST -H "Content-Type: application/json" -D ./body.txt https://font-search-api.5ptbfrnv53qj2.ap-northeast-1.cs.amazonlightsail.com/v1/fonts/
