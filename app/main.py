@@ -76,4 +76,9 @@ async def mock_ocr():
     return OCR_RESPONSE_BODY
 
 
+@app.get("/health")
+async def health():
+    return {"status": "OK"}
+
+
 handler = Mangum(app)
