@@ -1,0 +1,32 @@
+name: deploy
+
+on:
+  workflow_run:
+    workflows:
+      - test
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "ap-northeast-1"
+
+      - name: Build, tag, and push image to Lightsail container
+        # env:
+        #   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        #   ECR_REPOSITORY: github-actions-test
+        #   IMAGE_TAG: latest
+        run: |
+          docker build -t font-search-api:v999999 .
+          aws lightsail push-container-image --region ap-northeast-1 --service-name font-search-api --label font-search-api --image font-search-api:v999999
