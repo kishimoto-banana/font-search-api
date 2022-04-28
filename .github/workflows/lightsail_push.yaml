@@ -34,8 +34,6 @@ jobs:
           sudo chmod +x /usr/local/bin/lightsailctl
 
       - name: Build, tag, and push image to Lightsail container
-        env:
-          IMAGE_TAG: v$(date +"%Y%m%d_%H%M")
         run: |
           IMAGE_TAG=$(echo v$(date +"%Y%m%d_%H%M"))
           docker build -t font-search-api:$IMAGE_TAG .
