@@ -1,20 +1,23 @@
 import base64
 import random
 from io import BytesIO
+from logging import getLogger
 
 import numpy as np
 import torch
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
 from mangum import Mangum
+from PIL import Image
 
-from app.config.settings import MODEL_PATH, NUM_PATCHES
 from app.config.constant import OCR_RESPONSE_BODY
+from app.config.settings import MODEL_PATH, NUM_PATCHES
 from app.domain.entity import Request, Response
 from app.domain.predictor import FontPredictor, fetch_vgg16
 from app.domain.preprocess import FontImagePreprocessor
 from app.domain.transform import FontImageTranform
+
+logger = getLogger("uvicorn")
 
 torch.manual_seed(5)
 np.random.seed(5)
@@ -53,8 +56,11 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
+    logger.info("fetch vgg16")
     net = fetch_vgg16()
+    logger.info("load weight")
     net.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device("cpu")))
+    logger.info("eval")
     net.eval()
 
     transform = FontImageTranform()
