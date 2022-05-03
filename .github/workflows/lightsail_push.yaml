@@ -37,4 +37,4 @@ jobs:
         run: |
           IMAGE_TAG=$(echo v$(date +"%Y%m%d_%H%M"))
           docker build -t font-search-api:$IMAGE_TAG .
-          aws lightsail push-container-image --region ap-northeast-1 --service-name font-search-api --label font-search-api --image font-search-api:$IMAGE_TAG
+          aws lightsail push-container-image --region ap-northeast-1 --service-name fontpint --label font-search-api --image font-search-api:$IMAGE_TAG
