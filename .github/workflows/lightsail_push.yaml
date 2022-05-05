@@ -14,11 +14,6 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          lfs: true
-
-      - name: Checkout LFS objects
-        run: git lfs checkout
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -37,6 +32,13 @@ jobs:
         run: |
           curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl"
           sudo chmod +x /usr/local/bin/lightsailctl
+
+      - name: Download model file from S3
+        env:
+          S3_MODEL_BUCKET: ${{ secrets.S3_MODEL_BUCKET }}
+        run: |
+          aws s3 cp s3://$S3_MODEL_BUCKET/font365_vgg16.pt ./models/  --quiet
+          aws s3 cp s3://$S3_MODEL_BUCKET/meta.pkl ./models/  --quiet
 
       - name: Build, tag, and push image to Lightsail container
         run: |
