@@ -16,6 +16,11 @@ from app.domain.entity import Request, Response
 from app.domain.predictor import FontPredictor, fetch_vgg16
 from app.domain.preprocess import FontImagePreprocessor
 from app.domain.transform import FontImageTranform
+from app.domain.ocr import TextDetector
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = getLogger("uvicorn")
 
@@ -68,6 +73,9 @@ async def startup_event():
     predictor = FontPredictor(preprocessor=preprocessor, model=net)
     app.state.predictor = predictor
 
+    text_detector = TextDetector()
+    app.state.text_detector = text_detector
+
 
 @app.post("/v1/fonts/", response_model=Response)
 async def predict_fonts(req: Request):
@@ -84,6 +92,14 @@ async def mock_ocr():
 
 @app.get("/health")
 async def health():
+    return {"status": "OK"}
+
+
+@app.post("/tmp")
+async def tmp(req: Request):
+    content = req.content
+    app.state.text_detector.detect(content)
+
     return {"status": "OK"}
 
 
