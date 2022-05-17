@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+from typing import List, Tuple
 
 import boto3
 from app.domain.entity import BoundingBox
@@ -23,7 +24,7 @@ class TextDetector:
         self.client = vision.ImageAnnotatorClient(credentials=cred)
         fp.close()
 
-    def detect(self, content):
+    def detect(self, content: str) -> Tuple[List[BoundingBox], str]:
         image = vision.Image(content=content)
 
         response = self.client.text_detection(image=image, timeout=10)
@@ -35,6 +36,7 @@ class TextDetector:
         if not response_dict["pages"]:
             raise HTTPException(status_code=400, detail="Text not found")
 
+        text = response_dict["text"].replace("\n", "")
         bounding_boxes = []
         for paragraph in response_dict["pages"][0]["blocks"][0]["paragraphs"]:
             for words in paragraph["words"]:
@@ -49,4 +51,4 @@ class TextDetector:
                         BoundingBox(left=left, upper=upper, right=right, lower=lower)
                     )
 
-        return bounding_boxes
+        return bounding_boxes, text

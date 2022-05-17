@@ -81,11 +81,12 @@ async def predict_fonts(req: Request):
     content = req.content
 
     # OCR
-    bounding_boxes = app.state.text_detector.detect(content)
+    bounding_boxes, text = app.state.text_detector.detect(content)
 
     # フォント認識
     image = base64_to_pil(content, gray=True)
-    return app.state.predictor.predict(image, bounding_boxes)
+    fonts = app.state.predictor.predict(image, bounding_boxes)
+    return Response(text=text, fonts=fonts)
 
 
 @app.post("/mock/ocr/")

@@ -19,6 +19,7 @@ class Request(BaseModel):
 
 
 class Response(BaseModel):
+    text: str
     fonts: List[PredictFont]
 
 
