@@ -80,7 +80,10 @@ async def startup_event():
 async def predict_fonts(req: Request):
     content = req.content
 
+    # OCR
     bounding_boxes = app.state.text_detector.detect(content)
+
+    # フォント認識
     image = base64_to_pil(content, gray=True)
     return app.state.predictor.predict(image, bounding_boxes)
 
