@@ -5,20 +5,19 @@ from logging import getLogger
 
 import numpy as np
 import torch
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from PIL import Image
 
 from app.config.constant import OCR_RESPONSE_BODY
-from app.config.settings import MODEL_PATH, NUM_PATCHES
+from app.config.settings import MODEL_PATH
 from app.domain.entity import Request, Response
+from app.domain.ocr import TextDetector
 from app.domain.predictor import FontPredictor, fetch_vgg16
 from app.domain.preprocess import FontImagePreprocessor
 from app.domain.transform import FontImageTranform
-from app.domain.ocr import TextDetector
-
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -69,7 +68,7 @@ async def startup_event():
     net.eval()
 
     transform = FontImageTranform()
-    preprocessor = FontImagePreprocessor(transform=transform, num_patchs=NUM_PATCHES)
+    preprocessor = FontImagePreprocessor(transform=transform)
     predictor = FontPredictor(preprocessor=preprocessor, model=net)
     app.state.predictor = predictor
 
@@ -80,9 +79,10 @@ async def startup_event():
 @app.post("/v1/fonts/", response_model=Response)
 async def predict_fonts(req: Request):
     content = req.content
-    image = base64_to_pil(content, gray=True)
 
-    return app.state.predictor.predict(image)
+    bounding_boxes = app.state.text_detector.detect(content)
+    image = base64_to_pil(content, gray=True)
+    return app.state.predictor.predict(image, bounding_boxes)
 
 
 @app.post("/mock/ocr/")
@@ -92,14 +92,6 @@ async def mock_ocr():
 
 @app.get("/health")
 async def health():
-    return {"status": "OK"}
-
-
-@app.post("/tmp")
-async def tmp(req: Request):
-    content = req.content
-    app.state.text_detector.detect(content)
-
     return {"status": "OK"}
 
 

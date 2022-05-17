@@ -1,19 +1,11 @@
 import json
 import os
 import tempfile
-from dataclasses import dataclass
 
 import boto3
+from app.domain.entity import BoundingBox
 from google.cloud import vision
 from google.oauth2 import service_account
-
-
-@dataclass
-class BoundingBox:
-    left: int
-    upper: int
-    right: int
-    lower: int
 
 
 class TextDetector:
@@ -39,7 +31,7 @@ class TextDetector:
         )
         response_dict = json.loads(response_json)
 
-        char_bbs = []
+        bounding_boxes = []
         for paragraph in response_dict["pages"][0]["blocks"][0]["paragraphs"]:
             for words in paragraph["words"]:
                 for symbol in words["symbols"]:
@@ -49,12 +41,8 @@ class TextDetector:
                     right = int(symbol["boundingBox"]["vertices"][2]["x"])
                     lower = int(symbol["boundingBox"]["vertices"][2]["y"])
 
-                    char_bb = {
-                        "char": char,
-                        "bb": BoundingBox(
-                            left=left, upper=upper, right=right, lower=lower
-                        ),
-                    }
-                    char_bbs.append(char_bb)
+                    bounding_boxes.append(
+                        BoundingBox(left=left, upper=upper, right=right, lower=lower)
+                    )
 
-        print(char_bbs)
+        return bounding_boxes

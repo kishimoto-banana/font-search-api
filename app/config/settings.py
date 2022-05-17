@@ -2,7 +2,7 @@ import pickle
 
 NUM_TOP_K = 5
 PATCH_SIZE = 105
-NUM_PATCHES = 5
+PATCH_MARGIN = 5
 MODEL_PATH = "models/font365_vgg16.pt"
 
 try:

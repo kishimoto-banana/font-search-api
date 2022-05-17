@@ -1,12 +1,13 @@
 from abc import ABCMeta, abstractmethod
+from typing import List
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from app.config.settings import NUM_TOP_K, FONT_LABEL_TO_META
-from app.domain.entity import PredictFont, Response
+from app.config.settings import FONT_LABEL_TO_META, NUM_TOP_K
+from app.domain.entity import BoundingBox, PredictFont, Response
 from app.domain.preprocess import Preprocessor
-from PIL import Image
+from PIL.Image import Image
 from torchvision import models
 
 
@@ -20,12 +21,12 @@ def fetch_vgg16() -> nn.Module:
 
 class Predictor(metaclass=ABCMeta):
     @abstractmethod
-    def predict(self, image: Image) -> Response:
+    def predict(self, image: Image, bounding_boxes: List[BoundingBox]) -> Response:
         raise NotImplementedError("Method not implemented")
 
 
 class MockPredictor(Predictor):
-    def predict(self, image: Image) -> Response:
+    def predict(self, image: Image, bounding_boxes: List[BoundingBox]) -> Response:
         return Response(
             fonts=[
                 PredictFont(
@@ -46,13 +47,12 @@ class FontPredictor(Predictor):
         self.preprocessor = preprocessor
         self.model = model
 
-    def predict(self, image: Image) -> Response:
-        patches = self.preprocessor(image)
+    def predict(self, image: Image, bounding_boxes: List[BoundingBox]) -> Response:
+        patches = self.preprocessor(image, bounding_boxes)
         outputs = self.model(patches)
         agg_outputs = torch.mean(outputs, dim=0)
         top_fonts = torch.argsort(agg_outputs, descending=True)[:NUM_TOP_K].numpy()
         scores = F.softmax(agg_outputs, dim=0)[top_fonts].detach().numpy()
-
         return Response(
             fonts=[
                 PredictFont(
