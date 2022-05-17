@@ -4,6 +4,7 @@ import tempfile
 
 import boto3
 from app.domain.entity import BoundingBox
+from fastapi import HTTPException
 from google.cloud import vision
 from google.oauth2 import service_account
 
@@ -30,6 +31,9 @@ class TextDetector:
             response.full_text_annotation
         )
         response_dict = json.loads(response_json)
+
+        if not response_dict["pages"]:
+            raise HTTPException(status_code=400, detail="Text not found")
 
         bounding_boxes = []
         for paragraph in response_dict["pages"][0]["blocks"][0]["paragraphs"]:
