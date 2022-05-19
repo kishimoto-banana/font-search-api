@@ -108,8 +108,9 @@ class TextDetectorGcp(TextDetector):
         return bounding_boxes, text
 
     def detect_http(self, content: str):
+        endoint = os.environ["GCP_OCR_ENDPOINT"]
         res = requests.post(
-            "https://vision.googleapis.com/v1/images:annotate?key=AIzaSyAYz8Xz5Vai2ixq-XHs2lUAyxIElURd1nk",
+            endoint,
             json={
                 "requests": [
                     {
