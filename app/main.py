@@ -14,7 +14,7 @@ from PIL import Image
 from app.config.constant import OCR_RESPONSE_BODY
 from app.config.settings import MODEL_PATH
 from app.domain.entity import Request, Response
-from app.domain.ocr import TextDetector
+from app.domain.ocr import TextDetectorAzure, TextDetectorGcp
 from app.domain.predictor import FontPredictor, fetch_vgg16
 from app.domain.preprocess import FontImagePreprocessor
 from app.domain.transform import FontImageTranform
@@ -72,8 +72,10 @@ async def startup_event():
     predictor = FontPredictor(preprocessor=preprocessor, model=net)
     app.state.predictor = predictor
 
-    text_detector = TextDetector()
+    text_detector = TextDetectorGcp()
     app.state.text_detector = text_detector
+    text_detector_azure = TextDetectorAzure()
+    app.state.text_detector_azure = text_detector_azure
 
 
 @app.post("/v1/fonts/", response_model=Response)
@@ -81,11 +83,14 @@ async def predict_fonts(req: Request):
     content = req.content
 
     # OCR
-    bounding_boxes, text = app.state.text_detector.detect(content)
+    # bounding_boxes, text = app.state.text_detector.detect(content)
+    bounding_boxes, text = app.state.text_detector.detect_http(content)
+    # bounding_boxes, text = app.state.text_detector_azure.detect(content)
 
     # フォント認識
     image = base64_to_pil(content, gray=True)
     fonts = app.state.predictor.predict(image, bounding_boxes)
+    logger.info(fonts)
     return Response(text=text, fonts=fonts)
 
 
