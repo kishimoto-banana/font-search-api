@@ -37,7 +37,7 @@ jobs:
         env:
           S3_MODEL_BUCKET: ${{ secrets.S3_MODEL_BUCKET }}
         run: |
-          aws s3 cp s3://$S3_MODEL_BUCKET/font365_vgg16.pt ./models/  --quiet
+          aws s3 cp s3://$S3_MODEL_BUCKET/char_font365_vgg16.pt ./models/  --quiet
           aws s3 cp s3://$S3_MODEL_BUCKET/meta.pkl ./models/  --quiet
 
       - name: Build, tag, and push image to Lightsail container

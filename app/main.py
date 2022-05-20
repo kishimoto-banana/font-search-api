@@ -5,17 +5,21 @@ from logging import getLogger
 
 import numpy as np
 import torch
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from PIL import Image
 
 from app.config.constant import OCR_RESPONSE_BODY
-from app.config.settings import MODEL_PATH, NUM_PATCHES
+from app.config.settings import MODEL_PATH
 from app.domain.entity import Request, Response
+from app.domain.ocr import TextDetectorGcp
 from app.domain.predictor import FontPredictor, fetch_vgg16
 from app.domain.preprocess import FontImagePreprocessor
 from app.domain.transform import FontImageTranform
+
+load_dotenv()
 
 logger = getLogger("uvicorn")
 
@@ -64,17 +68,25 @@ async def startup_event():
     net.eval()
 
     transform = FontImageTranform()
-    preprocessor = FontImagePreprocessor(transform=transform, num_patchs=NUM_PATCHES)
+    preprocessor = FontImagePreprocessor(transform=transform)
     predictor = FontPredictor(preprocessor=preprocessor, model=net)
     app.state.predictor = predictor
+
+    text_detector = TextDetectorGcp()
+    app.state.text_detector = text_detector
 
 
 @app.post("/v1/fonts/", response_model=Response)
 async def predict_fonts(req: Request):
     content = req.content
-    image = base64_to_pil(content, gray=True)
 
-    return app.state.predictor.predict(image)
+    # OCR
+    bounding_boxes, text = app.state.text_detector.detect(content)
+
+    # フォント認識
+    image = base64_to_pil(content, gray=True)
+    fonts = app.state.predictor.predict(image, bounding_boxes)
+    return Response(text=text, fonts=fonts)
 
 
 @app.post("/mock/ocr/")
