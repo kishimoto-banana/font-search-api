@@ -45,10 +45,7 @@ class TextDetectorAzure(TextDetector):
         bounding_boxes = []
         for region in response.regions:
             for line in region.lines:
-                # print("Bounding box: {}".format(line.bounding_box))
                 for word in line.words:
-                    print(word.text)
-                    print(word.bounding_box)
                     left, upper, width, height = map(int, word.bounding_box.split(","))
                     bounding_boxes.append(
                         BoundingBox(
@@ -60,7 +57,6 @@ class TextDetectorAzure(TextDetector):
                     )
                     text += word.text
 
-        print(bounding_boxes, text)
         return bounding_boxes, text
 
 
@@ -90,21 +86,50 @@ class TextDetectorGcp(TextDetector):
         if not response_dict["pages"]:
             raise HTTPException(status_code=400, detail="Text not found")
 
-        text = response_dict["text"].replace("\n", "")
+        text = ""
         bounding_boxes = []
-        for paragraph in response_dict["pages"][0]["blocks"][0]["paragraphs"]:
-            for words in paragraph["words"]:
-                for symbol in words["symbols"]:
-                    char = symbol["text"]
-                    left = int(symbol["boundingBox"]["vertices"][0]["x"])
-                    upper = int(symbol["boundingBox"]["vertices"][0]["y"])
-                    right = int(symbol["boundingBox"]["vertices"][2]["x"])
-                    lower = int(symbol["boundingBox"]["vertices"][2]["y"])
+        for page in response_dict["pages"]:
+            for block in page["blocks"]:
+                for paragraph in block["paragraphs"]:
+                    for words in paragraph["words"]:
+                        for symbol in words["symbols"]:
+                            char = symbol["text"]
+                            try:
+                                left = (
+                                    int(symbol["boundingBox"]["vertices"][0]["x"])
+                                    if "x" in symbol["boundingBox"]["vertices"][0]
+                                    else int(symbol["boundingBox"]["vertices"][3]["x"])
+                                )
+                                upper = (
+                                    int(symbol["boundingBox"]["vertices"][0]["y"])
+                                    if "y" in symbol["boundingBox"]["vertices"][0]
+                                    else int(symbol["boundingBox"]["vertices"][1]["y"])
+                                )
+                                right = (
+                                    int(symbol["boundingBox"]["vertices"][2]["x"])
+                                    if "x" in symbol["boundingBox"]["vertices"][2]
+                                    else int(symbol["boundingBox"]["vertices"][1]["x"])
+                                )
+                                lower = (
+                                    int(symbol["boundingBox"]["vertices"][2]["y"])
+                                    if "y" in symbol["boundingBox"]["vertices"][2]
+                                    else int(symbol["boundingBox"]["vertices"][3]["y"])
+                                )
+                            except KeyError:
+                                raise HTTPException(
+                                    status_code=400, detail="Text not found"
+                                )
 
-                    bounding_boxes.append(
-                        BoundingBox(left=left, upper=upper, right=right, lower=lower)
-                    )
-        print(bounding_boxes)
+                            if left >= right or upper >= lower:
+                                continue
+
+                            text += char
+
+                            bounding_boxes.append(
+                                BoundingBox(
+                                    left=left, upper=upper, right=right, lower=lower
+                                )
+                            )
         return bounding_boxes, text
 
     def detect_http(self, content: str):
@@ -124,45 +149,51 @@ class TextDetectorGcp(TextDetector):
         )
 
         response = res.json()
-        logger.info(response)
 
         if not response["responses"][0]:
             raise HTTPException(status_code=400, detail="Text not found")
 
-        text = response["responses"][0]["fullTextAnnotation"]["text"].replace("\n", "")
+        text = ""
         bounding_boxes = []
-        for paragraph in response["responses"][0]["fullTextAnnotation"]["pages"][0][
-            "blocks"
-        ][0]["paragraphs"]:
-            for words in paragraph["words"]:
-                for symbol in words["symbols"]:
-                    char = symbol["text"]
-                    try:
-                        left = (
-                            int(symbol["boundingBox"]["vertices"][0]["x"])
-                            if "x" in symbol["boundingBox"]["vertices"][0]
-                            else int(symbol["boundingBox"]["vertices"][3]["x"])
-                        )
-                        upper = (
-                            int(symbol["boundingBox"]["vertices"][0]["y"])
-                            if "y" in symbol["boundingBox"]["vertices"][0]
-                            else int(symbol["boundingBox"]["vertices"][1]["y"])
-                        )
-                        right = (
-                            int(symbol["boundingBox"]["vertices"][2]["x"])
-                            if "x" in symbol["boundingBox"]["vertices"][2]
-                            else int(symbol["boundingBox"]["vertices"][1]["x"])
-                        )
-                        lower = (
-                            int(symbol["boundingBox"]["vertices"][2]["y"])
-                            if "y" in symbol["boundingBox"]["vertices"][2]
-                            else int(symbol["boundingBox"]["vertices"][3]["y"])
-                        )
-                    except KeyError:
-                        raise HTTPException(status_code=400, detail="Text not found")
+        for page in response["responses"][0]["fullTextAnnotation"]["pages"]:
+            for block in page["blocks"]:
+                for paragraph in block["paragraphs"]:
+                    for words in paragraph["words"]:
+                        for symbol in words["symbols"]:
+                            char = symbol["text"]
+                            try:
+                                left = (
+                                    int(symbol["boundingBox"]["vertices"][0]["x"])
+                                    if "x" in symbol["boundingBox"]["vertices"][0]
+                                    else int(symbol["boundingBox"]["vertices"][3]["x"])
+                                )
+                                upper = (
+                                    int(symbol["boundingBox"]["vertices"][0]["y"])
+                                    if "y" in symbol["boundingBox"]["vertices"][0]
+                                    else int(symbol["boundingBox"]["vertices"][1]["y"])
+                                )
+                                right = (
+                                    int(symbol["boundingBox"]["vertices"][2]["x"])
+                                    if "x" in symbol["boundingBox"]["vertices"][2]
+                                    else int(symbol["boundingBox"]["vertices"][1]["x"])
+                                )
+                                lower = (
+                                    int(symbol["boundingBox"]["vertices"][2]["y"])
+                                    if "y" in symbol["boundingBox"]["vertices"][2]
+                                    else int(symbol["boundingBox"]["vertices"][3]["y"])
+                                )
+                            except KeyError:
+                                raise HTTPException(
+                                    status_code=400, detail="Text not found"
+                                )
 
-                    bounding_boxes.append(
-                        BoundingBox(left=left, upper=upper, right=right, lower=lower)
-                    )
-        print(bounding_boxes)
+                            if left >= right or upper >= lower:
+                                continue
+
+                            text += char
+                            bounding_boxes.append(
+                                BoundingBox(
+                                    left=left, upper=upper, right=right, lower=lower
+                                )
+                            )
         return bounding_boxes, text

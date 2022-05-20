@@ -2,8 +2,8 @@ import pickle
 
 NUM_TOP_K = 5
 PATCH_SIZE = 105
-PATCH_MARGIN = 5
-MODEL_PATH = "models/font365_vgg16.pt"
+PATCH_MARGIN = 3
+MODEL_PATH = "models/char_font365_vgg16_checkpoint.pt"
 
 try:
     with open("models/meta.pkl", mode="rb") as f:
